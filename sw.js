@@ -1,9 +1,9 @@
 // Service worker : application utilisable hors ligne (coque + données + tuiles déjà vues).
-const VERSION = 'v7'
+const VERSION = 'v8'
 const SHELL_CACHE = `tram-shell-${VERSION}`
 const TILE_CACHE = `tram-tiles-${VERSION}`
 const MAX_TILES = 500
-const TILE_HOST = 'tile.openstreetmap.org'
+const isTileHost = (h) => h === 'tile.openstreetmap.org' || h.endsWith('.basemaps.cartocdn.com')
 
 const SHELL = [
   '/', '/index.html', '/config.js', '/manifest.webmanifest',
@@ -68,7 +68,7 @@ self.addEventListener('fetch', (event) => {
   if (request.method !== 'GET') return
   const url = new URL(request.url)
 
-  if (url.hostname === TILE_HOST) {
+  if (isTileHost(url.hostname)) {
     event.respondWith(staleWhileRevalidate(request, TILE_CACHE, { limit: MAX_TILES }))
     return
   }

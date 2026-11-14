@@ -33,12 +33,18 @@ export function createBaseMap({ el, config, initialView }) {
   map.setView(view.center, view.zoom)
   if (window.matchMedia('(min-width: 900px)').matches) L.control.zoom({ position: 'topright' }).addTo(map)
 
-  const ATTRIBUTION = '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">contributeurs OpenStreetMap</a> · Données <a href="https://data.montpellier3m.fr" target="_blank" rel="noopener">TaM / Montpellier Méditerranée Métropole</a>'
+  const DATA_CREDIT = 'Données <a href="https://data.montpellier3m.fr" target="_blank" rel="noopener">TaM / Montpellier Méditerranée Métropole</a>'
+  const SOURCES = [
+    { url: config.tileUrl, attribution: `© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">contributeurs OpenStreetMap</a> · ${DATA_CREDIT}` },
+    ...(config.tileFallback ? [{ url: config.tileFallback.url, subdomains: 'abcd', attribution: `${config.tileFallback.attribution} · ${DATA_CREDIT}` }] : []),
+  ]
+  // Essais successifs : OpenStreetMap avec CORS (cache hors ligne), sans CORS, puis le fond de secours.
+  const ATTEMPTS = [[0, true], [0, false], ...(SOURCES.length > 1 ? [[1, true], [1, false]] : [])]
   const MAX_TILE_RETRIES = 3
   const BURST_ERRORS = 4
   const WATCHDOG_MS = 8000
   let tiles = null
-  let corsMode = true // mode CORS d'abord (permet de mettre les tuiles en cache) ; repli sans CORS si ça échoue
+  let attempt = 0
   let loaded = 0
   let errors = 0
   let watchdog = 0
@@ -46,18 +52,23 @@ export function createBaseMap({ el, config, initialView }) {
   const message = h('span', {}, 'Le fond de carte ne charge pas.')
   const notice = h('div', { class: 'map-notice', role: 'alert', hidden: true },
     h('div', {}, message),
-    h('button', { type: 'button', class: 'btn btn--sm', onclick: () => { notice.hidden = true; errors = 0; mount(corsMode); armWatchdog() } }, 'Réessayer'))
+    h('button', { type: 'button', class: 'btn btn--sm', onclick: () => { notice.hidden = true; mount(0); armWatchdog() } }, 'Réessayer'))
   el.parentElement.append(notice)
 
-  function mount(cors) {
+  function mount(index) {
     if (tiles) map.removeLayer(tiles)
-    corsMode = cors
+    attempt = index
     errors = 0
-    tiles = L.tileLayer(config.tileUrl, { maxZoom: 19, crossOrigin: cors, referrerPolicy: 'origin', keepBuffer: 4, updateWhenZooming: false, attribution: ATTRIBUTION }).addTo(map)
+    const [sourceIdx, cors] = ATTEMPTS[index]
+    const source = SOURCES[sourceIdx]
+    tiles = L.tileLayer(source.url, {
+      maxZoom: 19, crossOrigin: cors, referrerPolicy: 'origin', keepBuffer: 4, updateWhenZooming: false,
+      attribution: source.attribution, subdomains: source.subdomains ?? 'abc',
+    }).addTo(map)
     tiles.on('tileload', () => { loaded += 1; notice.hidden = true })
     tiles.on('tileerror', ({ tile }) => {
       errors += 1
-      if (corsMode && loaded === 0 && errors >= BURST_ERRORS) { mount(false); armWatchdog(); return } // les premières tuiles échouent : essai sans CORS
+      if (loaded === 0 && errors >= BURST_ERRORS && attempt < ATTEMPTS.length - 1) { mount(attempt + 1); armWatchdog(); return }
       tile._retries = (tile._retries ?? 0) + 1
       if (tile._retries > MAX_TILE_RETRIES) return
       const base = tile.src.split('#')[0]
@@ -65,15 +76,20 @@ export function createBaseMap({ el, config, initialView }) {
     })
   }
 
-  /** Teste si le serveur de tuiles est joignable pour dire à l'utilisateur pourquoi la carte est vide. */
+  /** Charge une tuile dans une <img> (autorisé par la politique de sécurité, contrairement à fetch). */
+  const probeImage = (url) => new Promise((resolve) => {
+    const img = new Image()
+    const timer = setTimeout(() => resolve(false), 6000)
+    img.onload = () => { clearTimeout(timer); resolve(true) }
+    img.onerror = () => { clearTimeout(timer); resolve(false) }
+    img.src = url.replace('{s}', 'a').replace('{z}', '5').replace('{x}', '16').replace('{y}', '11')
+  })
+
   async function explain() {
-    if (!navigator.onLine) return 'Vous êtes hors ligne : les tuiles non mises en cache ne peuvent pas s\'afficher.'
-    try {
-      await fetch(config.tileUrl.replace('{z}', '5').replace('{x}', '16').replace('{y}', '11'), { mode: 'no-cors', cache: 'no-store', signal: AbortSignal.timeout(6000) })
-      return 'Le serveur OpenStreetMap répond mais le navigateur refuse les tuiles. Essayez de recharger la page ou de désactiver les bloqueurs de contenu.'
-    } catch {
-      return 'OpenStreetMap est inaccessible depuis ce réseau ou ce navigateur (bloqueur de publicités, VPN, pare-feu ?).'
-    }
+    if (!navigator.onLine) return "Vous êtes hors ligne : les tuiles non mises en cache ne peuvent pas s'afficher."
+    const [osm, backup] = await Promise.all(SOURCES.map((s) => probeImage(s.url)))
+    if (osm || backup) return 'Les serveurs de cartes répondent mais la carte ne se dessine pas. Rechargez la page, ou fermez et rouvrez l\'application.'
+    return 'Aucun serveur de cartes en ligne ne répond depuis ce réseau ou ce navigateur (bloqueur de publicités, VPN, pare-feu, économiseur de données ?).'
   }
 
   function armWatchdog() {
@@ -81,13 +97,13 @@ export function createBaseMap({ el, config, initialView }) {
     const before = loaded
     watchdog = setTimeout(async () => {
       if (loaded !== before) return
-      if (corsMode) { mount(false); armWatchdog(); return } // 1re étape : repli sans CORS
+      if (attempt < ATTEMPTS.length - 1) { mount(attempt + 1); armWatchdog(); return }
       message.textContent = await explain()
       if (loaded === before) notice.hidden = false
     }, WATCHDOG_MS)
   }
 
-  mount(true)
+  mount(0)
   armWatchdog()
 
   // La carte doit se redimensionner avec son conteneur (barre d'adresse mobile, rotation, PWA installée).

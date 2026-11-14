@@ -23,7 +23,7 @@ const MIME = {
 const SECURITY_HEADERS = {
   'Content-Security-Policy': [
     "default-src 'self'", "script-src 'self'", "style-src 'self'",
-    "img-src 'self' data: https://tile.openstreetmap.org", "font-src 'self'",
+    "img-src 'self' data: https://tile.openstreetmap.org https://*.basemaps.cartocdn.com", "font-src 'self'",
     "connect-src 'self' https://gtfsproxy.e-tam.fr", "worker-src 'self'", "manifest-src 'self'",
     "object-src 'none'", "base-uri 'self'", "frame-ancestors 'none'",
   ].join('; '),

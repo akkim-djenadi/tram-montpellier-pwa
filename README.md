@@ -22,6 +22,15 @@ npm test         # 30 tests (décodeur GTFS-RT, moteur d'horaires, géométrie, 
 | `VehiclePosition.pb`, `TripUpdate.pb`, `Alert.pb` | Copiés dans `fixtures/` : jeu de test du décodeur et mode « Instantané fourni ». |
 | `GTFS/fare_*.txt`, `ticketing_deep_links.txt` | Onglet Infos : tarifs et lien m-ticket. |
 
+## Itinéraires (onglet Trajet)
+
+Choisissez un arrêt de départ et d'arrivée (ou « Partir d'ici / Aller ici » depuis une fiche d'arrêt, ou le bouton
+⌖ pour partir de votre position), puis « maintenant » ou une heure. Le calcul (`src/router.js`, algorithme RAPTOR)
+renvoie l'heure d'arrivée à la minute, avec correspondances (jusqu'à 4) et marche entre arrêts voisins (≤ 300 m) :
+le plus rapide, le moins de correspondances, puis les départs suivants. Il se base sur les horaires théoriques du GTFS ;
+le premier départ est comparé au temps réel quand il est disponible (retard affiché, arrivée estimée pour un trajet direct).
+Le tracé s'affiche sur la carte.
+
 ## Trois sources de positions (onglet Infos)
 
 1. **Automatique** : flux GTFS-RT TaM s'il est frais (< 3 min), sinon horaires théoriques.

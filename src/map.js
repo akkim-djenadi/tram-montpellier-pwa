@@ -1,5 +1,6 @@
 // Couche carte : Leaflet + OpenStreetMap. Lignes, arrêts, trams animés, position de l'utilisateur.
 import { h } from './dom.js'
+import { slicePolyline } from './geo.js'
 
 const L = window.L
 const reduceMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -189,6 +190,38 @@ export function createMap({ map, config, net, onStation, describeTram, getBottom
     if (!raf) raf = requestAnimationFrame(frame)
   }
 
+  // ── Itinéraire : tracé épais par tronçon (couleur de la ligne), marche en pointillés ──
+  const journeyLayer = L.layerGroup().addTo(map)
+  const pin = (latlng, text, kind) => L.marker(latlng, {
+    icon: L.divIcon({ className: 'tram-icon', html: h('div', { class: `journey-pin journey-pin--${kind}` }, text), iconSize: [30, 30], iconAnchor: [15, 15] }),
+    interactive: false, keyboard: false, zIndexOffset: 2000,
+  })
+  const at = (stopId) => { const st = net.stopsById.get(stopId); return [st.lat, st.lon] }
+
+  function showJourney(journey) {
+    journeyLayer.clearLayers()
+    if (!journey) return
+    const points = []
+    for (const leg of journey.legs) {
+      if (leg.type === 'ride') {
+        const pattern = net.patterns[leg.pattern]
+        const route = net.routesById.get(leg.route)
+        const line = slicePolyline(pattern.poly, pattern.stopD[leg.boardPos], pattern.stopD[leg.alightPos])
+        L.polyline(line, { color: '#ffffff', weight: 12, opacity: 0.95, lineCap: 'round', interactive: false }).addTo(journeyLayer)
+        L.polyline(line, { color: route.color, weight: 7, opacity: 1, lineCap: 'round', interactive: false }).addTo(journeyLayer)
+        points.push(...line)
+        if (leg !== journey.legs[0]) pin(at(leg.fromStop), '', 'step').addTo(journeyLayer)
+      } else {
+        const line = [at(leg.fromStop), at(leg.toStop)]
+        L.polyline(line, { color: '#0e1418', weight: 4, dashArray: '2 8', lineCap: 'round', interactive: false }).addTo(journeyLayer)
+        points.push(...line)
+      }
+    }
+    pin(at(journey.legs[0].fromStop), 'A', 'start').addTo(journeyLayer)
+    pin(at(journey.legs.at(-1).toStop), 'B', 'end').addTo(journeyLayer)
+    map.fitBounds(points, { paddingTopLeft: [40, 130], paddingBottomRight: [40, getBottomInset() + 30], maxZoom: 16 })
+  }
+
   // ── Position de l'utilisateur ──
   let me = null
   let accuracy = null
@@ -209,7 +242,7 @@ export function createMap({ map, config, net, onStation, describeTram, getBottom
 
   return {
     leaflet: map,
-    setVisibleRoutes, setTrams, setUser,
+    setVisibleRoutes, setTrams, setUser, showJourney,
     // Recentre en tenant compte du panneau qui masque le bas de la carte.
     flyTo(lat, lon, zoom = 16) {
       const z = Math.max(map.getZoom(), zoom)

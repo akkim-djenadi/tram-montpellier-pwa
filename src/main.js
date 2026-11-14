@@ -9,6 +9,8 @@ import { startLocating, geoErrorMessage } from './locate.js'
 import { setupInstall } from './install.js'
 import { nearestStations, searchStations, delayLabel } from './domain.js'
 import { localParts, formatClock } from './time.js'
+import { createRouter } from './router.js'
+import { createJourneyPanel } from './journey-view.js'
 import * as views from './views.js'
 
 const $ = (id) => document.getElementById(id)
@@ -121,7 +123,7 @@ async function boot() {
   mapCtl.setVisibleRoutes(activeRoutes())
 
   // ── Panneau ──
-  const panels = { around: $('panel-around'), trams: $('panel-trams'), lines: $('panel-lines'), info: $('panel-info') }
+  const panels = { around: $('panel-around'), trams: $('panel-trams'), lines: $('panel-lines'), journey: $('panel-journey'), info: $('panel-info') }
   const sheet = createSheet({
     root: $('sheet'), handle: $('sheet-handle'), tabs: [...document.querySelectorAll('.tabs__tab')], panels,
     onTab: (tab) => { set({ tab }); renderAll() },
@@ -141,6 +143,8 @@ async function boot() {
       if (window.matchMedia('(max-width: 899px)').matches) sheet.setSnap('peek')
       mapCtl.panToTram(id)
     },
+    journeyFrom(station) { openJourney('setFrom', station) },
+    journeyTo(station) { openJourney('setTo', station) },
     toggleRoute(id) {
       const active = new Set(S.active)
       if (active.has(id)) active.delete(id); else active.add(id)
@@ -157,6 +161,40 @@ async function boot() {
       poll()
       renderAll()
     },
+  }
+
+  // ── Itinéraire d'un arrêt à un autre (horaires théoriques, comparés au temps réel pour le 1er départ) ──
+  const router = createRouter(net)
+  function liveForLeg(leg, date) {
+    const mode = displayMode()
+    if (mode === 'schedule' || !S.live || date !== localParts(Date.now(), net.meta.timezone).date) return null
+    const candidates = liveDepartures(S.live, leg.fromStop, viewNow(), 16)
+      .filter((d) => d.route === leg.route)
+      .map((d) => ({ delay: d.delay, secs: localParts(d.epochMs, net.meta.timezone).secs }))
+      .map((d) => ({ ...d, gap: Math.abs(d.secs - leg.dep) }))
+      .filter((d) => d.gap <= 600)
+      .sort((a, b) => a.gap - b.gap)
+    return candidates[0] ? { secs: candidates[0].secs, delay: candidates[0].secs - leg.dep } : null
+  }
+  let pendingGeoStart = false
+  const journeyPanel = createJourneyPanel({
+    host: panels.journey, net, router, liveForLeg,
+    onShow: (journey) => mapCtl.showJourney(journey),
+    requestMyStation() {
+      if (S.userPos) { fromMyPosition(); return }
+      pendingGeoStart = true
+      $('btn-locate').click()
+    },
+  })
+  function fromMyPosition() {
+    const [nearest] = nearestStations(net.stations, S.userPos, { max: 1, radius: 5000 })
+    if (nearest) journeyPanel.setFrom(nearest.station)
+    else set({ userError: 'Aucun arrêt à moins de 5 km de votre position.' })
+  }
+  function openJourney(method, station) {
+    sheet.setTab('journey')
+    sheet.setSnap('full')
+    journeyPanel[method](station)
   }
 
   /** Applique une nouvelle sélection de lignes : carte, véhicules, listes et puces. */
@@ -299,6 +337,7 @@ async function boot() {
           sheet.setTab('around')
           mapCtl.flyTo(pos.lat, pos.lon, 15.5)
         }
+        if (pendingGeoStart) { pendingGeoStart = false; fromMyPosition(); sheet.setTab('journey') }
         renderAround()
       },
       onError(error) {
@@ -344,7 +383,7 @@ async function boot() {
     if (document.hidden) return
     if (displayMode() === 'schedule') applyTrams()
     renderStatus()
-    if (S.tab !== 'info' && S.tab !== 'lines') renderAll()
+    if (!['info', 'lines', 'journey'].includes(S.tab)) renderAll()
   }, 1000)
   setInterval(() => { if (!document.hidden) poll() }, config.pollMs)
 

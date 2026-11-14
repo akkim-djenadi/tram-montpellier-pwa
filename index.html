@@ -16,6 +16,7 @@
   <link rel="stylesheet" href="/styles/tokens.css">
   <link rel="stylesheet" href="/styles/app.css">
   <link rel="stylesheet" href="/styles/sheet.css">
+  <link rel="stylesheet" href="/styles/journey.css">
 </head>
 <body>
   <a class="skip-link" href="#sheet">Aller aux horaires</a>
@@ -51,12 +52,14 @@
       <button role="tab" id="tab-around" class="tabs__tab" aria-selected="true" aria-controls="panel-around" data-tab="around">Autour</button>
       <button role="tab" id="tab-trams" class="tabs__tab" aria-selected="false" aria-controls="panel-trams" data-tab="trams" tabindex="-1">Véhicules</button>
       <button role="tab" id="tab-lines" class="tabs__tab" aria-selected="false" aria-controls="panel-lines" data-tab="lines" tabindex="-1">Lignes</button>
+      <button role="tab" id="tab-journey" class="tabs__tab" aria-selected="false" aria-controls="panel-journey" data-tab="journey" tabindex="-1">Trajet</button>
       <button role="tab" id="tab-info" class="tabs__tab" aria-selected="false" aria-controls="panel-info" data-tab="info" tabindex="-1">Infos</button>
     </div>
     <div id="sheet-body" class="sheet__body">
       <div role="tabpanel" id="panel-around" class="panel" aria-labelledby="tab-around"></div>
       <div role="tabpanel" id="panel-trams" class="panel" aria-labelledby="tab-trams" hidden></div>
       <div role="tabpanel" id="panel-lines" class="panel" aria-labelledby="tab-lines" hidden></div>
+      <div role="tabpanel" id="panel-journey" class="panel" aria-labelledby="tab-journey" hidden></div>
       <div role="tabpanel" id="panel-info" class="panel" aria-labelledby="tab-info" hidden></div>
     </div>
   </section>

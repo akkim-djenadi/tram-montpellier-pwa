@@ -46,6 +46,9 @@ export function stationDetail(ctx, station, departures, actions) {
         h('h2', { class: 'h' }, station.name),
         h('p', { class: 'sub' }, station.routes.map((r) => ctx.net.routesById.get(r)).map((r) => badge(r, true)), station.pmr ? ' · accessible PMR' : '')),
       ),
+    h('div', { class: 'station__go' },
+      h('button', { class: 'btn btn--ghost btn--sm', type: 'button', onclick: () => actions.journeyFrom(station) }, 'Partir d\'ici'),
+      h('button', { class: 'btn btn--ghost btn--sm', type: 'button', onclick: () => actions.journeyTo(station) }, 'Aller ici')),
     ...[departureRows(ctx, departures)].flat(),
     ctx.userPos ? null : h('p', { class: 'sub' }, 'Touchez « Me localiser » pour voir la distance à pied.'),
   ]

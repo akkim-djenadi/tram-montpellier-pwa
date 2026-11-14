@@ -33,6 +33,13 @@ export function previousDate(date) {
   return d.getUTCFullYear() * 10000 + (d.getUTCMonth() + 1) * 100 + d.getUTCDate()
 }
 
+/** Date AAAAMMJJ du jour suivant. */
+export function nextDate(date) {
+  const d = new Date(Date.UTC(Math.floor(date / 10000), Math.floor((date % 10000) / 100) - 1, date % 100))
+  d.setUTCDate(d.getUTCDate() + 1)
+  return d.getUTCFullYear() * 10000 + (d.getUTCMonth() + 1) * 100 + d.getUTCDate()
+}
+
 export function formatClock(secs) {
   const s = ((Math.round(secs) % 86400) + 86400) % 86400
   const pad = (n) => String(n).padStart(2, '0')

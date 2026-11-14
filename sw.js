@@ -1,5 +1,5 @@
 // Service worker : application utilisable hors ligne (coque + données + tuiles déjà vues).
-const VERSION = 'v5'
+const VERSION = 'v6'
 const SHELL_CACHE = `tram-shell-${VERSION}`
 const TILE_CACHE = `tram-tiles-${VERSION}`
 const MAX_TILES = 500
@@ -7,9 +7,9 @@ const TILE_HOST = 'tile.openstreetmap.org'
 
 const SHELL = [
   '/', '/index.html', '/config.js', '/manifest.webmanifest',
-  '/styles/tokens.css', '/styles/app.css', '/styles/sheet.css',
+  '/styles/tokens.css', '/styles/app.css', '/styles/sheet.css', '/styles/journey.css',
   '/src/main.js', '/src/dom.js', '/src/geo.js', '/src/time.js', '/src/schedule.js', '/src/gtfsrt.js',
-  '/src/realtime.js', '/src/map.js', '/src/sheet.js', '/src/views.js', '/src/domain.js', '/src/locate.js', '/src/install.js',
+  '/src/realtime.js', '/src/map.js', '/src/sheet.js', '/src/views.js', '/src/domain.js', '/src/locate.js', '/src/install.js', '/src/router.js', '/src/journey-view.js',
   '/vendor/leaflet/leaflet.js', '/vendor/leaflet/leaflet.css',
   '/fonts/bricolage-latin.woff2', '/fonts/dmmono-latin.woff2',
   '/icons/icon-192.png', '/icons/logo-mark.png', '/icons/icon-512.png', '/icons/favicon-32.png', '/icons/apple-touch-icon.png',

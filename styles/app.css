@@ -112,6 +112,10 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .stop-label { background: var(--surface); color: var(--text); border: 0; border-radius: 6px; font-weight: 600; font-size: 12px; padding: 2px 6px; box-shadow: var(--shadow); }
 .stop-label::before { display: none; }
 
+.journey-pin { width: 30px; height: 30px; display: grid; place-items: center; border-radius: 50%; border: 3px solid #fff; font-weight: 800; font-size: 0.9375rem; box-shadow: 0 2px 8px rgb(14 20 24 / 0.5); }
+.journey-pin--start { background: #0f9d58; color: #fff; }
+.journey-pin--end { background: #d4303a; color: #fff; }
+.journey-pin--step { width: 16px; height: 16px; margin: 7px; background: #fff; border: 3px solid #0e1418; }
 .me { position: relative; width: 22px; height: 22px; }
 .me::before { content: ''; position: absolute; inset: 0; border-radius: 50%; background: var(--focus); opacity: 0.35; animation: ping 2.2s var(--ease-out-expo) infinite; }
 .me::after { content: ''; position: absolute; inset: 4px; border-radius: 50%; background: var(--focus); border: 3px solid #fff; box-shadow: 0 1px 6px rgb(0 0 0 / 0.4); }

@@ -113,8 +113,10 @@
 .linepick[aria-pressed='true'] .linepick__state { background: var(--text); box-shadow: none; }
 .linepick[aria-pressed='true'] .linepick__state::after { content: ''; position: absolute; left: 7px; top: 3px; width: 6px; height: 11px; border: solid var(--surface); border-width: 0 3px 3px 0; transform: rotate(45deg); }
 .linepick[aria-pressed='false'] .badge { opacity: 0.45; }
-.tabs__tab { font-size: 0.875rem; }
+.tabs__tab { font-size: 0.8125rem; letter-spacing: -0.01em; }
 .chip--bus { width: auto; padding: 0 12px; display: inline-flex; align-items: center; gap: 6px; background: var(--chrome); color: var(--chrome-text); font-size: 0.9375rem; }
 .chip--bus[aria-pressed='false'] { background: var(--surface); color: var(--text-muted); }
 .chip--bus b { display: inline-grid; place-items: center; min-width: 20px; height: 20px; border-radius: 10px; background: var(--chrome-text); color: var(--chrome); font-size: 0.75rem; padding: 0 5px; }
 .chip--bus[aria-pressed='false'] b { display: none; }
+
+.station__go { display: flex; gap: 8px; }

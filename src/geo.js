@@ -87,3 +87,11 @@ export function project(poly, pt, fromD = 0, tieMeters = 15) {
   }
   return best
 }
+
+/** Sous-polyligne entre les abscisses d0 et d1 (mètres), extrémités interpolées. */
+export function slicePolyline(poly, d0, d1) {
+  const a = pointAt(poly, d0)
+  const b = pointAt(poly, d1)
+  const inner = poly.points.filter((_, i) => poly.cum[i] > d0 && poly.cum[i] < d1)
+  return [[a.lat, a.lon], ...inner, [b.lat, b.lon]]
+}

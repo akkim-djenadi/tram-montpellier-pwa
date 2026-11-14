@@ -1,5 +1,5 @@
 // Service worker : application utilisable hors ligne (coque + données + tuiles déjà vues).
-const VERSION = 'v6'
+const VERSION = 'v7'
 const SHELL_CACHE = `tram-shell-${VERSION}`
 const TILE_CACHE = `tram-tiles-${VERSION}`
 const MAX_TILES = 500
@@ -40,7 +40,7 @@ async function staleWhileRevalidate(request, cacheName, { limit } = {}) {
   const cache = await caches.open(cacheName)
   const cached = await cache.match(request)
   const refresh = fetch(request).then((res) => {
-    if (res.ok || res.type === 'opaque') {
+    if (res.ok) { // les réponses opaques (tuiles sans CORS) ne sont pas stockées : elles gonflent le quota
       cache.put(request, res.clone()).then(() => limit && trim(cacheName, limit))
     }
     return res

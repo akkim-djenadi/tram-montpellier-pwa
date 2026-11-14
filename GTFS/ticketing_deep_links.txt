@@ -1,0 +1,2 @@
+ticketing_deep_link_id,web_url,android_intent_uri,ios_universal_link_url
+mticket-deeplink,https://mticket.tam-voyages.com/open,https://mticket.tam-voyages.com/open,https://mticket.tam-voyages.com/open

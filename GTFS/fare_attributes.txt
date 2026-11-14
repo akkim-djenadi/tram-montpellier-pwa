@@ -1,0 +1,9 @@
+fare_id,price,currency_type,payment_method,transfers,agency_id,transfer_duration
+TAM_1,2.1,EUR,1,,TAM,5400
+TAM_2,3.8,EUR,1,,TAM,14400
+TAM_3,6.5,EUR,1,,TAM,86400
+TAM_4,14,EUR,1,,TAM,86400
+TAM_5,10.5,EUR,1,,TAM,172800
+TAM_6,12.5,EUR,1,,TAM,259200
+TAM_7,14.5,EUR,1,,TAM,345600
+TAM_8,20.5,EUR,1,,TAM,604800

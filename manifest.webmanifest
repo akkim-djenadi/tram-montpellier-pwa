@@ -1,0 +1,18 @@
+{
+  "name": "Tram Montpellier — en direct",
+  "short_name": "Tram MTP",
+  "description": "Où sont les tramways de Montpellier, en temps réel. Prochains passages et arrêts autour de vous.",
+  "lang": "fr",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#ffffff",
+  "theme_color": "#0E1418",
+  "categories": ["travel", "navigation", "transportation"],
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

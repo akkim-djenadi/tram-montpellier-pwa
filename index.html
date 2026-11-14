@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Tram Montpellier — en direct</title>
+  <meta name="description" content="Position des tramways de Montpellier en temps réel, prochains passages et arrêts autour de vous.">
+  <meta name="theme-color" content="#0E1418">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="preload" href="/fonts/bricolage-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/vendor/leaflet/leaflet.css">
+  <link rel="stylesheet" href="/styles/tokens.css">
+  <link rel="stylesheet" href="/styles/app.css">
+  <link rel="stylesheet" href="/styles/sheet.css">
+</head>
+<body>
+  <a class="skip-link" href="#sheet">Aller aux horaires</a>
+
+  <header class="topbar">
+    <div class="brand">
+      <img class="brand__mark" src="/icons/logo-mark.png" alt="" width="40" height="28">
+      <h1 class="brand__name">Tram <span>Montpellier</span></h1>
+    </div>
+    <p id="status" class="status" role="status" aria-live="polite" data-state="loading">
+      <span class="status__dot" aria-hidden="true"></span>
+      <span id="status-text">Chargement…</span>
+    </p>
+  </header>
+
+  <nav class="lines" aria-label="Filtrer les lignes"><ul id="line-chips" class="lines__list"></ul></nav>
+
+  <main class="stage">
+    <div id="map" class="map" role="application" aria-label="Carte des tramways et bus en temps réel"></div>
+    <div class="map-actions">
+      <button id="btn-locate" class="fab" type="button" aria-label="Me localiser" title="Me localiser">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><circle cx="12" cy="12" r="3.2" fill="currentColor"/><circle cx="12" cy="12" r="7.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 1.5v4M12 18.5v4M1.5 12h4M18.5 12h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <button id="btn-install" class="fab fab--accent" type="button" hidden aria-label="Installer l'application" title="Installer l'application">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M12 3v11m0 0-4-4m4 4 4-4M5 17v2.5h14V17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+  </main>
+
+  <section id="sheet" class="sheet" data-snap="peek" aria-label="Horaires et informations">
+    <button id="sheet-handle" class="sheet__handle" type="button" aria-label="Agrandir ou réduire le panneau" aria-expanded="false" aria-controls="sheet-body"><span></span></button>
+    <div role="tablist" class="tabs" aria-label="Sections">
+      <button role="tab" id="tab-around" class="tabs__tab" aria-selected="true" aria-controls="panel-around" data-tab="around">Autour</button>
+      <button role="tab" id="tab-trams" class="tabs__tab" aria-selected="false" aria-controls="panel-trams" data-tab="trams" tabindex="-1">Véhicules</button>
+      <button role="tab" id="tab-lines" class="tabs__tab" aria-selected="false" aria-controls="panel-lines" data-tab="lines" tabindex="-1">Lignes</button>
+      <button role="tab" id="tab-info" class="tabs__tab" aria-selected="false" aria-controls="panel-info" data-tab="info" tabindex="-1">Infos</button>
+    </div>
+    <div id="sheet-body" class="sheet__body">
+      <div role="tabpanel" id="panel-around" class="panel" aria-labelledby="tab-around"></div>
+      <div role="tabpanel" id="panel-trams" class="panel" aria-labelledby="tab-trams" hidden></div>
+      <div role="tabpanel" id="panel-lines" class="panel" aria-labelledby="tab-lines" hidden></div>
+      <div role="tabpanel" id="panel-info" class="panel" aria-labelledby="tab-info" hidden></div>
+    </div>
+  </section>
+
+  <noscript><p class="noscript">Cette application nécessite JavaScript.</p></noscript>
+  <script src="/vendor/leaflet/leaflet.js"></script>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

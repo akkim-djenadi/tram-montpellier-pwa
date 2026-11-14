@@ -1,0 +1,80 @@
+/* Direction : signalétique de transport suisse — papier, encre, couleurs de ligne franches. */
+@font-face {
+  font-family: 'Bricolage Grotesque';
+  src: url('/fonts/bricolage-latin.woff2') format('woff2');
+  font-weight: 200 800;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'DM Mono';
+  src: url('/fonts/dmmono-latin.woff2') format('woff2');
+  font-weight: 500;
+  font-display: swap;
+}
+
+:root {
+  --ink: #0e1418;
+  --ink-2: #1b242b;
+  --paper: #f3efe6;
+  --paper-2: #e8e3d6;
+  --rule: #cfc8b6;
+  --muted: #5d6368;
+  --live: #0f9d58;
+  --warn: #c77700;
+  --alert: #d4303a;
+  --focus: #1a73e8;
+
+  --surface: var(--paper);
+  --surface-2: var(--paper-2);
+  --text: var(--ink);
+  --text-muted: var(--muted);
+  --line-rule: var(--rule);
+  --chrome: var(--ink);
+  --chrome-text: var(--paper);
+  --shadow: 0 10px 30px rgb(14 20 24 / 0.22), 0 2px 6px rgb(14 20 24 / 0.18);
+
+  --font-ui: 'Bricolage Grotesque', 'Avenir Next', 'Segoe UI', system-ui, sans-serif;
+  --font-num: 'DM Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  --text-sm: 0.8125rem;
+  --text-base: 0.9375rem;
+  --text-lg: 1.125rem;
+  --text-eta: clamp(1.35rem, 1.1rem + 1vw, 1.75rem);
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --gutter: 16px;
+
+  --radius-chip: 7px;
+  --radius-card: 12px;
+  --radius-sheet: 22px;
+
+  --duration-fast: 150ms;
+  --duration-normal: 320ms;
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --peek: 168px;
+  --panel-w: 400px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --surface: #131b21;
+    --surface-2: #1c262e;
+    --text: #f1ede3;
+    --text-muted: #9ba3a9;
+    --line-rule: #2c3841;
+    --chrome: #f3efe6;
+    --chrome-text: #0e1418;
+    --live: #3ddc97;
+    --warn: #f2a900;
+    --alert: #ff6b73;
+    --focus: #7ab4ff;
+    --shadow: 0 10px 30px rgb(0 0 0 / 0.5), 0 2px 6px rgb(0 0 0 / 0.4);
+  }
+}

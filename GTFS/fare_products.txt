@@ -1,0 +1,9 @@
+fare_product_id,fare_product_name,amount,currency
+1,Ticket 1h30,2.10,EUR
+2,Ticket 4h,3.80,EUR
+3,Ticket 24h,6.50,EUR
+4,Ticket groupe 24h,14.00,EUR
+5,Ticket 48h,10.50,EUR
+6,Ticket 72h,12.50,EUR
+7,Ticket 96h,14.50,EUR
+8,Ticket 7 jours,20.50,EUR

@@ -1,0 +1,9 @@
+leg_group_id,fare_product_id,network_id
+L_1,1,
+L_2,2,
+L_3,3,
+L_4,4,
+L_5,5,
+L_6,6,
+L_7,7,
+L_8,8,

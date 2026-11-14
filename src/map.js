@@ -21,18 +21,62 @@ function tramElement(tram, route) {
 /** Écart d'angle le plus court, pour que la flèche ne fasse pas le tour complet. */
 const unwrapAngle = (current, target) => current + ((((target - current) % 360) + 540) % 360) - 180
 
-export function createMap({ el, config, net, onStation, describeTram, initialView, getBottomInset = () => 0 }) {
+/**
+ * Fond de carte seul, créé tout de suite au démarrage (avant le chargement des 3,5 Mo de
+ * données) pour que l'écran ne reste jamais vide. Les tuiles en échec sont retentées, et un
+ * bandeau propose de réessayer si aucune tuile ne s'affiche.
+ */
+export function createBaseMap({ el, config, initialView }) {
   const map = L.map(el, { zoomControl: false, attributionControl: true, zoomSnap: 0.5, minZoom: 10, maxZoom: 19 })
   const view = initialView ?? { center: config.center, zoom: config.zoom }
   map.setView(view.center, view.zoom)
   if (window.matchMedia('(min-width: 900px)').matches) L.control.zoom({ position: 'topright' }).addTo(map)
 
-  L.tileLayer(config.tileUrl, {
+  const tiles = L.tileLayer(config.tileUrl, {
     maxZoom: 19,
     crossOrigin: true,
     attribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">contributeurs OpenStreetMap</a> · Données <a href="https://data.montpellier3m.fr" target="_blank" rel="noopener">TaM / Montpellier Méditerranée Métropole</a>',
   }).addTo(map)
 
+  const MAX_TILE_RETRIES = 3
+  let loaded = 0
+  const notice = h('div', { class: 'map-notice', role: 'alert', hidden: true },
+    h('span', {}, 'Le fond de carte ne charge pas.'),
+    h('button', { type: 'button', class: 'btn btn--sm', onclick: () => { notice.hidden = true; tiles.redraw(); armWatchdog() } }, 'Réessayer'))
+  el.parentElement.append(notice)
+
+  tiles.on('tileload', () => { loaded += 1; notice.hidden = true })
+  tiles.on('tileerror', ({ tile }) => {
+    tile._retries = (tile._retries ?? 0) + 1
+    if (tile._retries > MAX_TILE_RETRIES) return
+    const base = tile.src.split('#')[0]
+    setTimeout(() => { tile.src = `${base}#retry${tile._retries}` }, 800 * tile._retries)
+  })
+
+  let watchdog = 0
+  function armWatchdog() {
+    clearTimeout(watchdog)
+    const before = loaded
+    watchdog = setTimeout(() => { if (loaded === before) notice.hidden = false }, 10_000)
+  }
+  armWatchdog()
+
+  // La carte doit se redimensionner avec son conteneur (barre d'adresse mobile, rotation, PWA installée).
+  const refit = () => map.invalidateSize({ animate: false })
+  if ('ResizeObserver' in window) new ResizeObserver(refit).observe(el)
+  window.addEventListener('orientationchange', () => setTimeout(refit, 250))
+  window.addEventListener('pageshow', refit)
+
+  // Résolue quand les premières tuiles sont affichées (ou après 4 s) : le chargement des
+  // données attend ce moment pour ne pas se disputer la bande passante avec le fond de carte.
+  map.tilesReady = new Promise((resolve) => {
+    tiles.once('load', resolve)
+    setTimeout(resolve, 4000)
+  })
+  return map
+}
+
+export function createMap({ map, config, net, onStation, describeTram, getBottomInset = () => 0 }) {
   // ── Lignes : tracé officiel pour le tram, segments d'arrêt en arrêt pour le bus ──
   const lineGroups = new Map()
   const addLine = (route, coords, weight) => {

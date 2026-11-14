@@ -61,7 +61,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .stage { position: fixed; inset: 0; }
 .map { position: absolute; inset: 0; background: #e8e4da; font-family: var(--font-ui); }
 @media (prefers-color-scheme: dark) {
-  .map .leaflet-tile-pane { filter: invert(0.92) hue-rotate(180deg) brightness(0.92) contrast(0.92) saturate(0.7); }
+  .map .leaflet-tile-pane { filter: invert(0.92) hue-rotate(180deg) brightness(1.08) contrast(0.95) saturate(0.7); }
   .map { background: #11181d; }
 }
 .leaflet-container a { color: inherit; }
@@ -71,6 +71,11 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .leaflet-popup-content { margin: 12px 14px; font-family: var(--font-ui); }
 .leaflet-container a.leaflet-popup-close-button { color: var(--text-muted); }
 
+.map-notice {
+  position: fixed; z-index: 1060; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: var(--radius-card);
+  background: var(--surface); color: var(--text); box-shadow: var(--shadow); font-weight: 600;
+}
 .map-actions { position: fixed; z-index: 1050; right: var(--gutter); bottom: calc(var(--peek) + var(--safe-bottom) + 14px); display: grid; gap: 10px; }
 .fab {
   width: 52px; height: 52px; border-radius: 16px; border: 0; display: grid; place-items: center;

@@ -3,7 +3,7 @@ import { config } from '../config.js'
 import { h } from './dom.js'
 import { createNetwork, vehiclesAt, departuresAt } from './schedule.js'
 import { fetchRealtime, buildLiveState, isFresh, liveDepartures, pickDepartures, ageSeconds } from './realtime.js'
-import { createMap } from './map.js'
+import { createBaseMap, createMap } from './map.js'
 import { createSheet } from './sheet.js'
 import { startLocating, geoErrorMessage } from './locate.js'
 import { setupInstall } from './install.js'
@@ -30,9 +30,11 @@ function renderInto(host, nodes) {
 }
 
 async function boot() {
+  const prefs = loadPrefs()
+  // La carte d'abord : elle s'affiche pendant que les données du réseau se téléchargent.
+  const baseMap = createBaseMap({ el: $('map'), config, initialView: prefs.view })
   const raw = await (await fetch('/data/network.json')).json()
   const net = createNetwork(raw)
-  const prefs = loadPrefs()
 
   let S = {
     mode: prefs.mode ?? 'auto', live: null, liveError: null, lineQuery: '',
@@ -111,7 +113,7 @@ async function boot() {
   }
 
   const mapCtl = createMap({
-    el: $('map'), config, net, describeTram, initialView: prefs.view,
+    map: baseMap, config, net, describeTram,
     getBottomInset: () => bottomInset(),
     onStation: (station) => actions.openStation(station),
   })

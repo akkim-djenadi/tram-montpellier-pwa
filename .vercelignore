@@ -4,6 +4,6 @@ GTFS.zip
 /MMM_MMM_LigneTram.json
 tools
 tests
-server.mjs
+server.local.mjs
 node_modules
 .DS_Store

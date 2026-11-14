@@ -34,13 +34,13 @@ Le bandeau en haut indique toujours la source réellement affichée.
 
 Source : `https://gtfsproxy.e-tam.fr/COMMON/{VehiclePosition,TripUpdate,Alert}.pb` (rafraîchi ~10 s).
 Ce serveur n'envoie pas d'en-tête CORS : un navigateur ne peut pas l'appeler directement, il faut
-passer par le proxy `/api/rt/{feed}` de `server.mjs` (`RT_BASE=https://…/ npm start` pour changer la
+passer par le proxy `/api/rt/{feed}` de `server.local.mjs` (`RT_BASE=https://…/ npm start` pour changer la
 source). Si la source ne répond pas, le proxy sert l'instantané fourni (en-tête `X-Feed-Source: snapshot`,
 jamais présenté comme du direct). Hébergement statique sans Node : l'app reste en horaires théoriques.
 
 ## Déploiement
 
-Servir en **HTTPS** (requis pour installation + géolocalisation). `server.mjs` n'est nécessaire que
+Servir en **HTTPS** (requis pour installation + géolocalisation). `server.local.mjs` n'est nécessaire que
 pour le proxy CORS ; sans lui il n'y a pas de direct (horaires théoriques seulement). Mettre à jour les
 horaires : remplacer `GTFS/` puis `npm run build:data` (et incrémenter `VERSION` dans `sw.js`).
 

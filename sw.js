@@ -1,9 +1,9 @@
 // Service worker : application utilisable hors ligne (coque + données + tuiles déjà vues).
-const VERSION = 'v8'
+const VERSION = 'v9'
 const SHELL_CACHE = `tram-shell-${VERSION}`
 const TILE_CACHE = `tram-tiles-${VERSION}`
 const MAX_TILES = 500
-const isTileHost = (h) => h === 'tile.openstreetmap.org' || h.endsWith('.basemaps.cartocdn.com')
+const isTileHost = (h) => h === 'tile.openstreetmap.org'
 
 const SHELL = [
   '/', '/index.html', '/config.js', '/manifest.webmanifest',

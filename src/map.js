@@ -35,6 +35,8 @@ export function createBaseMap({ el, config, initialView }) {
   const tiles = L.tileLayer(config.tileUrl, {
     maxZoom: 19,
     crossOrigin: true,
+    keepBuffer: 4, // garde les tuiles voisines : pas de trou pendant le zoom
+    updateWhenZooming: false, // les tuiles de l'ancien zoom restent visibles jusqu'à l'arrivée des nouvelles
     attribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">contributeurs OpenStreetMap</a> · Données <a href="https://data.montpellier3m.fr" target="_blank" rel="noopener">TaM / Montpellier Méditerranée Métropole</a>',
   }).addTo(map)
 

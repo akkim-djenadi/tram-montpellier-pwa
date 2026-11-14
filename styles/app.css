@@ -60,10 +60,8 @@ button { font: inherit; color: inherit; cursor: pointer; }
 /* ── Carte ────────────────────────────────────────────────────── */
 .stage { position: fixed; inset: 0; }
 .map { position: absolute; inset: 0; background: #e8e4da; font-family: var(--font-ui); }
-@media (prefers-color-scheme: dark) {
-  .map .leaflet-tile-pane { filter: invert(0.92) hue-rotate(180deg) brightness(1.08) contrast(0.95) saturate(0.7); }
-  .map { background: #11181d; }
-}
+/* Fond de carte clair dans les deux thèmes : un filtre d'inversion sur les tuiles noircit la carte pendant le zoom. */
+
 .leaflet-container a { color: inherit; }
 .leaflet-control-attribution { font-size: 10px; background: rgb(243 239 230 / 0.85) !important; }
 .leaflet-popup-content-wrapper { border-radius: var(--radius-card); background: var(--surface); color: var(--text); box-shadow: var(--shadow); }

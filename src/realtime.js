@@ -1,20 +1,23 @@
 // Assemble l'état temps réel à partir des flux GTFS-RT décodés, et sait les récupérer.
 import { decodeFeed } from './gtfsrt.js'
-import { inferHeadsign } from './schedule.js'
+import { inferHeadsign, findVehiclePattern } from './schedule.js'
+import { pointAt, polylineLength } from './geo.js'
 
 export const FEEDS = ['VehiclePosition', 'TripUpdate', 'Alert']
 export const MAX_FEED_AGE_S = 180
+export const MAX_DRIFT_S = 60
 
 /** Essaie chaque endpoint (gabarit avec {feed}) jusqu'au premier qui répond. */
-export async function fetchFeed(endpoints, feed, { fetchImpl = fetch, timeoutMs = 8000 } = {}) {
+export async function fetchFeed(endpoints, feed, { fetchImpl = fetch, timeoutMs = 8000, cacheBust = false } = {}) {
   let lastError = new Error('aucun endpoint configuré')
   for (const template of endpoints) {
-    const url = template.replace('{feed}', feed)
+    const base = template.replace('{feed}', feed)
+    const url = cacheBust ? `${base}${base.includes('?') ? '&' : '?'}_t=${Math.floor(Date.now() / 1000)}` : base
     try {
       const res = await fetchImpl(url, { cache: 'no-store', signal: AbortSignal.timeout(timeoutMs) })
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       const bytes = new Uint8Array(await res.arrayBuffer())
-      return { decoded: decodeFeed(bytes), origin: res.headers.get('x-feed-source') ?? 'live', url }
+      return { decoded: decodeFeed(bytes), origin: res.headers.get('x-feed-source') ?? 'live', url: base }
     } catch (error) {
       lastError = error
     }
@@ -51,7 +54,7 @@ function tramAlerts(net, alertFeed, nowSecs) {
     }))
 }
 
-/** État temps réel normalisé, limité aux trams du réseau. */
+/** État temps réel normalisé, limité aux trams et bus du réseau. */
 export function buildLiveState(net, { origin, vehicleFeed, tripFeed, alertFeed }) {
   const stopName = (id) => net.stopsById.get(id)?.name
   const tramTrips = tripFeed.tripUpdates.filter((t) => net.routesById.has(t.routeId))
@@ -83,11 +86,15 @@ export function buildLiveState(net, { origin, vehicleFeed, tripFeed, alertFeed }
       const event = upcoming?.arrival ?? upcoming?.departure
       const bearing = v.bearing ?? 0
       const guess = stops.length ? null : inferHeadsign(net, v.routeId, v.lat, v.lon, bearing)
+      const headsign = stops.length ? stopName(stops.at(-1).stopId) : guess?.headsign
+      const dir = v.directionId ?? guess?.dir
+      const track = findVehiclePattern(net, v.routeId, v.lat, v.lon, bearing, { dir, headsign })
       return {
         id: v.vehicleId ?? v.id, label: v.label ?? v.vehicleId ?? v.id, tripId: v.tripId,
-        route: v.routeId, dir: v.directionId, lat: v.lat, lon: v.lon,
+        route: v.routeId, dir, lat: v.lat, lon: v.lon,
         bearing, speed: v.speed ?? 0, status: v.status,
-        stopId: v.stopId, headsign: stops.length ? stopName(stops.at(-1).stopId) : guess?.headsign,
+        stopId: v.stopId, headsign: headsign ?? track?.pattern.headsign,
+        patternIdx: track?.pattern.index, patternD: track?.d,
         nextEpochMs: event?.time ? event.time * 1000 : undefined,
         delay: event?.delay ?? null, timestamp: (v.timestamp ?? vehicleFeed.timestamp) * 1000,
         source: 'live',
@@ -99,6 +106,29 @@ export function buildLiveState(net, { origin, vehicleFeed, tripFeed, alertFeed }
     origin, timestamp, vehicles, board,
     alerts: tramAlerts(net, alertFeed, (alertFeed.timestamp ?? Date.now() / 1000)),
   }
+}
+
+/**
+ * Calcule la position estimée des véhicules en direct à l'instant `nowMs`.
+ * Le flux GTFS-RT de la TaM rafraîchit les coordonnées GPS environ toutes les 30 s ;
+ * entre deux relevés GPS, les véhicules en mouvement avancent le long de leur tracé
+ * toutes les 10 s selon leur vitesse mesurée.
+ */
+export function liveVehiclesAt(net, state, nowMs = Date.now()) {
+  if (!state) return []
+  return state.vehicles.map((v) => {
+    if (v.status === 1 || !(v.speed > 0) || v.patternIdx === undefined) return v
+    const elapsedS = Math.max(0, Math.min(MAX_DRIFT_S, (nowMs - state.timestamp) / 1000))
+    if (elapsedS <= 0) return v
+    const pattern = net.patterns[v.patternIdx]
+    // Le champ speed du flux TaM est en km/h (divisé par 3.6 pour obtenir des m/s, facteur 0.85 prudent).
+    const speedMps = (v.speed / 3.6) * 0.85
+    const maxD = polylineLength(pattern.poly)
+    const nextD = Math.min(maxD, v.patternD + speedMps * elapsedS)
+    if (nextD <= v.patternD + 0.5) return v
+    const pos = pointAt(pattern.poly, nextD)
+    return { ...v, lat: pos.lat, lon: pos.lon, bearing: pos.bearing }
+  })
 }
 
 export const ageSeconds = (state, nowMs) => (nowMs - state.timestamp) / 1000

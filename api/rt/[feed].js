@@ -13,8 +13,8 @@ export default async function handler(req, res) {
     if (!upstream.ok) throw new Error(`HTTP ${upstream.status}`)
     res.setHeader('Content-Type', 'application/x-protobuf')
     res.setHeader('X-Feed-Source', 'live')
-    // Cache partagé de 5 s côté CDN : protège la source si beaucoup d'utilisateurs, reste « direct ».
-    res.setHeader('Cache-Control', 'public, s-maxage=5, stale-while-revalidate=5')
+    // Cache partagé de 10 s côté CDN : aligné sur le cycle d'actualisation client (10 s).
+    res.setHeader('Cache-Control', 'public, s-maxage=10, stale-while-revalidate=5')
     return res.status(200).send(Buffer.from(await upstream.arrayBuffer()))
   } catch (error) {
     console.warn(`[rt] ${feed}: ${error.message}`)

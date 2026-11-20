@@ -2,7 +2,7 @@
 import { config } from '../config.js'
 import { h } from './dom.js'
 import { createNetwork, vehiclesAt, departuresAt } from './schedule.js'
-import { fetchRealtime, buildLiveState, isFresh, liveDepartures, pickDepartures, ageSeconds } from './realtime.js'
+import { fetchRealtime, buildLiveState, liveVehiclesAt, isFresh, liveDepartures, pickDepartures, ageSeconds } from './realtime.js'
 import { createBaseMap, createMap } from './map.js'
 import { createSheet } from './sheet.js'
 import { startLocating, geoErrorMessage } from './locate.js'
@@ -68,9 +68,13 @@ async function boot() {
     return stationsCache.list
   }
 
-  function currentTrams() {
-    const mode = displayMode()
-    const list = mode === 'schedule' ? vehiclesAt(net, Date.now(), { routes: S.active }) : S.live.vehicles
+  function currentTrams(now = Date.now()) {
+    const mode = displayMode(now)
+    const list = mode === 'schedule'
+      ? vehiclesAt(net, now, { routes: S.active })
+      : mode === 'live'
+        ? liveVehiclesAt(net, S.live, now)
+        : S.live.vehicles
     return list.filter((t) => visible(t.route))
   }
 
@@ -97,7 +101,8 @@ async function boot() {
     const route = net.routesById.get(t.route)
     const nextId = t.stopId ?? t.nextStopId
     const lateness = delayLabel(t.delay)?.text
-    const kmh = Math.round((t.speed ?? 0) * 3.6)
+    // Le flux GTFS-RT TaM fournit déjà speed en km/h ; le moteur théorique le calcule en m/s.
+    const kmh = Math.round(t.source === 'live' ? (t.speed ?? 0) : (t.speed ?? 0) * 3.6)
     return h('div', { class: 'pop' },
       h('div', { class: 'pop__head' }, views.badge(route), `→ ${t.headsign ?? 'direction inconnue'}`),
       nextId ? h('div', { class: 'pop__row' }, t.status === 1 ? 'À l\'arrêt' : 'Prochain arrêt', h('strong', {}, net.stopsById.get(nextId)?.name ?? '')) : null,
@@ -287,8 +292,10 @@ async function boot() {
     const el = $('status')
     let state = mode
     let text
-    if (mode === 'live') text = `En direct · il y a ${Math.max(0, Math.round(ageSeconds(S.live, Date.now())))} s`
-    else if (mode === 'snapshot') text = `Instantané · ${formatClock(localParts(S.live.timestamp, net.meta.timezone).secs)}`
+    if (mode === 'live') {
+      const checkedAge = Math.max(0, Math.round((Date.now() - (S.live.fetchedAt ?? S.live.timestamp)) / 1000))
+      text = `En direct · ${checkedAge <= 1 ? 'à l\'instant' : `il y a ${checkedAge} s`}`
+    } else if (mode === 'snapshot') text = `Instantané · ${formatClock(localParts(S.live.timestamp, net.meta.timezone).secs)}`
     else if (!S.online) { state = 'offline'; text = 'Hors ligne · horaires' }
     else text = 'Horaires théoriques'
     el.dataset.state = state
@@ -302,8 +309,11 @@ async function boot() {
     polling = true
     try {
       const snapshot = S.mode === 'snapshot'
-      const result = await fetchRealtime(snapshot ? [config.snapshotEndpoint] : config.rtEndpoints, { forceOrigin: snapshot ? 'snapshot' : undefined })
-      set({ live: buildLiveState(net, result), liveError: null })
+      const result = await fetchRealtime(
+        snapshot ? [config.snapshotEndpoint] : config.rtEndpoints,
+        { forceOrigin: snapshot ? 'snapshot' : undefined, cacheBust: !snapshot },
+      )
+      set({ live: { ...buildLiveState(net, result), fetchedAt: Date.now() }, liveError: null })
     } catch (error) {
       set({ liveError: error.message || 'erreur réseau' })
     } finally {
@@ -316,7 +326,7 @@ async function boot() {
 
   function applyTrams() {
     const mode = displayMode()
-    mapCtl.setTrams(currentTrams(), { durationMs: mode === 'live' ? config.pollMs - 1000 : 1000, stale: mode === 'snapshot' })
+    mapCtl.setTrams(currentTrams(), { durationMs: mode === 'live' ? config.pollMs : 1000, stale: mode === 'snapshot' })
   }
 
   // ── Géolocalisation ──

@@ -1,5 +1,5 @@
 // Service worker : application utilisable hors ligne (coque + données + tuiles déjà vues).
-const VERSION = 'v9'
+const VERSION = 'v10'
 const SHELL_CACHE = `tram-shell-${VERSION}`
 const TILE_CACHE = `tram-tiles-${VERSION}`
 const MAX_TILES = 500

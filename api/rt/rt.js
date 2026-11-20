@@ -15,8 +15,8 @@ export default async function handler(req, res) {
     const arrayBuffer = await upstream.arrayBuffer();
     const bytes = Buffer.from(arrayBuffer);
     
-    // Optimisation Vercel pour rendre la carte très rapide
-    res.setHeader('Cache-Control', 's-maxage=5, stale-while-revalidate=10'); 
+    // Optimisation Vercel alignée sur le cycle d'actualisation de 10 s
+    res.setHeader('Cache-Control', 'public, s-maxage=10, stale-while-revalidate=5'); 
     res.setHeader('Content-Type', 'application/x-protobuf');
     res.setHeader('X-Feed-Source', 'live');
     

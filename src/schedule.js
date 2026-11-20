@@ -123,6 +123,27 @@ export function departuresAt(net, stopId, ms, { limit = 6, horizon = 5400, route
 const angleDiff = (a, b) => Math.abs(((a - b + 540) % 360) - 180)
 
 /**
+ * Trouve le tracé (pattern) et l'abscisse curviligne qui correspondent le mieux à la
+ * position, au sens et au cap d'un véhicule, afin de déduire sa destination ou de
+ * faire glisser sa position le long des rails entre deux relevés GPS.
+ */
+export function findVehiclePattern(net, route, lat, lon, bearing, { dir, headsign } = {}) {
+  let best = null
+  for (const pattern of net.patterns) {
+    if (pattern.route !== route) continue
+    if (dir !== undefined && pattern.dir !== dir) continue
+    const hit = project(pattern.poly, [lat, lon])
+    // Les trajets sans tracé officiel (bus) sont des segments droits entre arrêts : tolérance large.
+    if (!hit || hit.offset > (pattern.straight ? 300 : 80)) continue
+    const diff = angleDiff(pointAt(pattern.poly, hit.d).bearing, bearing)
+    const bonus = headsign && pattern.headsign === headsign ? -40 : 0
+    const score = hit.offset + diff * 0.5 + bonus
+    if (!best || score < best.score) best = { pattern, d: hit.d, offset: hit.offset, diff, score }
+  }
+  return best
+}
+
+/**
  * Déduit la destination d'un tram à partir de sa position et de son cap : on cherche
  * le trajet de la ligne qui passe à proximité en allant dans le même sens.
  */

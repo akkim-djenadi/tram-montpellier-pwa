@@ -11,6 +11,8 @@ import { nearestStations, searchStations, delayLabel } from './domain.js'
 import { localParts, formatClock } from './time.js'
 import { createRouter } from './router.js'
 import { createJourneyPanel } from './journey-view.js'
+import { computeSnapshotMetrics, loadObservatoryStore, saveObservatoryStore, recordSnapshot, createEmptyStore } from './analytics.js'
+import { createDataPanel } from './data-view.js'
 import * as views from './views.js'
 
 const $ = (id) => document.getElementById(id)

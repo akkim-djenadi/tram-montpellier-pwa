@@ -80,7 +80,7 @@ function renderTimelineSvg(timeline) {
       h('span', {}, lastTime)))
 }
 
-export function createDataPanel({ host, net, onClearHistory }) {
+export function createDataPanel({ host, net, standalone = false, onClearHistory }) {
   let filterMode = 'tram' // 'tram' | 'bus' | 'all'
   let selectedDate = null
 
@@ -220,7 +220,7 @@ export function createDataPanel({ host, net, onClearHistory }) {
               h('strong', {}, inc.title),
               h('span', { class: 'sub' }, `${fmtDate(inc.date)} à ${timeStr}`)))
         }))
-      : h('p', { class: 'notice' }, ' aucune anomalie majeure archivée pour l\'instant.')
+      : h('p', { class: 'notice' }, 'Aucune anomalie majeure archivée pour l\'instant.')
 
     // Boutons d'export des preuves (CSV / JSON)
     const actionsBar = h('div', { class: 'dactions' },
@@ -242,7 +242,9 @@ export function createDataPanel({ host, net, onClearHistory }) {
 
     host.replaceChildren(
       h('div', { class: 'dhead' },
-        h('h2', { class: 'h' }, 'Observatoire & Centre de données'),
+        h('div', { class: 'dsection-head' },
+          h('h2', { class: 'h' }, 'Observatoire & Centre de données'),
+          standalone ? null : h('a', { class: 'btn btn--ghost btn--sm datapage__link', href: '/data.html' }, 'Ouvrir en pleine page ↗')),
         h('p', { class: 'sub' }, 'Comparaison automatique toutes les 10 s entre les horaires théoriques engagés (GTFS) et la réalité du terrain (véhicules en service et retards GTFS-RT).')),
       isScheduleOnly
         ? h('p', { class: 'notice', 'data-kind': 'warn' }, 'Mode horaires théoriques actif : passez en mode « Automatique » ou « Instantané » dans l\'onglet Infos pour analyser les écarts et retards réels.')

@@ -12,7 +12,7 @@ const PORT = Number(process.env.PORT ?? 8080)
 const RT_BASE = process.env.RT_BASE ?? 'https://gtfsproxy.e-tam.fr/COMMON/'
 const UPSTREAM_TIMEOUT_MS = 6000
 const FEEDS = new Set(['VehiclePosition', 'TripUpdate', 'Alert'])
-const PUBLIC = ['index.html', 'manifest.webmanifest', 'sw.js', 'config.js', 'src', 'styles', 'data', 'vendor', 'fonts', 'icons', 'fixtures']
+const PUBLIC = ['index.html', 'data.html', 'manifest.webmanifest', 'sw.js', 'config.js', 'src', 'styles', 'data', 'vendor', 'fonts', 'icons', 'fixtures']
 
 const MIME = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8',

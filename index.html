@@ -27,10 +27,13 @@
       <img class="brand__mark" src="/icons/logo-mark.png" alt="" width="40" height="28">
       <h1 class="brand__name">Tram <span>Montpellier</span></h1>
     </div>
-    <p id="status" class="status" role="status" aria-live="polite" data-state="loading">
-      <span class="status__dot" aria-hidden="true"></span>
-      <span id="status-text">Chargement…</span>
-    </p>
+    <div class="topbar__right">
+      <a href="/data.html" class="status status--link" title="Observatoire Data & retards">Data ↗</a>
+      <p id="status" class="status" role="status" aria-live="polite" data-state="loading">
+        <span class="status__dot" aria-hidden="true"></span>
+        <span id="status-text">Chargement…</span>
+      </p>
+    </div>
   </header>
 
   <nav class="lines" aria-label="Filtrer les lignes"><ul id="line-chips" class="lines__list"></ul></nav>

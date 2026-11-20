@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Observatoire Data — Tram Montpellier</title>
+  <meta name="description" content="Observatoire et centre de données de la qualité du réseau TaM : historique du nombre de véhicules et des retards par ligne et par jour.">
+  <meta name="theme-color" content="#0E1418">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+  <link rel="preload" href="/fonts/bricolage-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/styles/tokens.css">
+  <link rel="stylesheet" href="/styles/app.css">
+  <link rel="stylesheet" href="/styles/sheet.css">
+  <link rel="stylesheet" href="/styles/data.css">
+</head>
+<body class="datapage">
+  <header class="datapage__header">
+    <div class="datapage__top">
+      <a class="brand datapage__link" href="/">
+        <img class="brand__mark" src="/icons/logo-mark.png" alt="" width="40" height="28">
+        <h1 class="brand__name">Tram <span>Data</span></h1>
+      </a>
+      <div class="datapage__nav">
+        <p id="status" class="status" role="status" aria-live="polite" data-state="loading">
+          <span class="status__dot" aria-hidden="true"></span>
+          <span id="status-text">Chargement…</span>
+        </p>
+        <a class="btn btn--sm datapage__link" href="/">← Carte en direct</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="data-root" class="datapage__main panel">
+    <p class="notice">Chargement de l'observatoire et des données réseau…</p>
+  </main>
+
+  <noscript><p class="noscript">Cette application nécessite JavaScript.</p></noscript>
+  <script type="module" src="/src/data-page.js"></script>
+</body>
+</html>

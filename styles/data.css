@@ -1,0 +1,139 @@
+/* Onglet Data : Observatoire de la qualité de service, KPIs, courbe, lignes et historique par jour */
+.dhead { display: grid; gap: 4px; }
+.dsection-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; }
+
+.dkpis {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+.dkpi {
+  padding: 10px 12px;
+  border-radius: var(--radius-card);
+  background: var(--surface-2);
+  display: grid;
+  gap: 2px;
+  box-shadow: inset 4px 0 0 var(--live);
+}
+.dkpi[data-severity='warn'] { box-shadow: inset 4px 0 0 var(--warn); }
+.dkpi[data-severity='critical'] { box-shadow: inset 4px 0 0 var(--alert); }
+.dkpi__label { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; }
+.dkpi__val { font: 700 1.25rem / 1.15 var(--font-num); letter-spacing: -0.03em; }
+.dkpi[data-severity='critical'] .dkpi__val { color: var(--alert); }
+.dkpi__sub { font-size: 0.72rem; color: var(--text-muted); }
+
+/* Graphique SVG d'évolution temps réel */
+.dchart {
+  padding: 10px 12px;
+  border-radius: var(--radius-card);
+  background: var(--surface-2);
+  display: grid;
+  gap: 6px;
+}
+.dchart__legend { display: flex; justify-content: space-between; gap: 8px; font-size: 0.75rem; font-weight: 700; }
+.dchart__item { display: inline-flex; align-items: center; gap: 6px; }
+.dchart__item::before { content: ''; width: 10px; height: 3px; border-radius: 2px; display: inline-block; }
+.dchart__item--live::before { background: var(--live); height: 4px; }
+.dchart__item--sched::before { background: var(--text-muted); border-top: 2px dashed var(--text-muted); }
+.dchart__svg { width: 100%; height: 84px; display: block; overflow: visible; }
+.dchart__area { fill: var(--live); fill-opacity: 0.14; }
+.dchart__line { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.dchart__line--live { stroke: var(--live); stroke-width: 2.5; }
+.dchart__line--sched { stroke: var(--text-muted); stroke-width: 1.75; stroke-dasharray: 4 4; }
+.dchart__axis { display: flex; justify-content: space-between; font: 500 0.7rem var(--font-num); color: var(--text-muted); }
+
+/* Filtres Tram / Bus / Tout */
+.dfilter { display: flex; gap: 4px; flex-wrap: wrap; }
+.dfilter .btn[data-active='false'] {
+  background: var(--surface-2);
+  color: var(--text-muted);
+}
+
+/* Cartes de diagnostic par ligne */
+.droutes { display: grid; gap: 8px; }
+.droute {
+  padding: 10px 12px;
+  border-radius: var(--radius-card);
+  background: var(--surface-2);
+  display: grid;
+  gap: 8px;
+}
+.droute[data-severity='critical'] { box-shadow: inset 0 0 0 1.5px var(--alert); }
+.droute__head { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 8px; }
+.droute__title { min-width: 0; display: grid; }
+.droute__title strong { font-size: var(--text-base); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.droute__title .sub { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.75rem; }
+.droute__bar-wrap { height: 6px; border-radius: 999px; background: var(--line-rule); overflow: hidden; }
+.droute__bar { height: 100%; border-radius: 999px; transition: width var(--duration-normal) var(--ease-out-expo); }
+.droute__stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  padding-top: 2px;
+}
+.droute__stats small { display: block; font-size: 0.6875rem; color: var(--text-muted); }
+.droute__stats strong { font: 500 0.8125rem var(--font-num); }
+.droute__stats strong[data-late='true'] { color: var(--alert); font-weight: 700; }
+
+/* Historique par jour */
+.ddays { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; }
+.dday-chip {
+  border: 1.5px solid var(--line-rule);
+  background: var(--surface-2);
+  color: var(--text);
+  border-radius: var(--radius-chip);
+  padding: 6px 10px;
+  font-size: var(--text-sm);
+  font-weight: 700;
+  white-space: nowrap;
+}
+.dday-chip[data-active='true'] {
+  background: var(--chrome);
+  color: var(--chrome-text);
+  border-color: var(--chrome);
+}
+.dday-chip small { font-weight: 500; opacity: 0.8; }
+
+.dday-box {
+  background: var(--surface-2);
+  border-radius: var(--radius-card);
+  padding: 10px 12px;
+  display: grid;
+  gap: 8px;
+}
+.dday-meta { display: grid; gap: 2px; font-size: 0.75rem; color: var(--text-muted); font-weight: 600; }
+.dtable-wrap { overflow-x: auto; margin: 0 -4px; padding: 0 4px; }
+.dtable { width: 100%; border-collapse: collapse; font-size: 0.75rem; text-align: left; }
+.dtable th {
+  color: var(--text-muted);
+  font-weight: 700;
+  padding: 6px 4px;
+  border-bottom: 1.5px solid var(--line-rule);
+  white-space: nowrap;
+}
+.dtable td {
+  padding: 7px 4px;
+  border-bottom: 1px solid var(--line-rule);
+  vertical-align: middle;
+}
+.dtable tr:last-child td { border-bottom: 0; }
+.dtable__num { font-family: var(--font-num); white-space: nowrap; }
+.dtable__num[data-late='true'] { color: var(--alert); font-weight: 700; }
+
+/* Journal des défaillances */
+.dincidents { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.dincident {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: var(--radius-card);
+  background: var(--surface-2);
+  box-shadow: inset 4px 0 0 var(--alert);
+}
+.dincident[data-kind='deficit'] { box-shadow: inset 4px 0 0 var(--warn); }
+.dincident__body { display: grid; gap: 2px; font-size: var(--text-sm); }
+
+/* Actions d'export */
+.dactions { display: flex; flex-wrap: wrap; gap: 8px; }

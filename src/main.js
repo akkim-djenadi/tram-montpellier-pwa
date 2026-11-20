@@ -128,11 +128,32 @@ async function boot() {
   mapCtl.setVisibleRoutes(activeRoutes())
 
   // ── Panneau ──
-  const panels = { around: $('panel-around'), trams: $('panel-trams'), lines: $('panel-lines'), journey: $('panel-journey'), info: $('panel-info') }
+  const panels = {
+    around: $('panel-around'), trams: $('panel-trams'), lines: $('panel-lines'),
+    journey: $('panel-journey'), data: $('panel-data'), info: $('panel-info'),
+  }
   const sheet = createSheet({
     root: $('sheet'), handle: $('sheet-handle'), tabs: [...document.querySelectorAll('.tabs__tab')], panels,
     onTab: (tab) => { set({ tab }); renderAll() },
   })
+
+  // ── Observatoire / Centre de données ──
+  let observatoryStore = loadObservatoryStore()
+  let latestMetrics = computeSnapshotMetrics(net, null, Date.now())
+  const dataPanel = createDataPanel({
+    host: panels.data,
+    net,
+    onClearHistory() {
+      observatoryStore = createEmptyStore()
+      if (S.live) {
+        latestMetrics = computeSnapshotMetrics(net, S.live, viewNow())
+        observatoryStore = recordSnapshot(observatoryStore, latestMetrics, S.live.alerts)
+      }
+      saveObservatoryStore(observatoryStore)
+      renderData()
+    },
+  })
+  const renderData = () => dataPanel.render({ metrics: latestMetrics, store: observatoryStore, displayMode: displayMode() })
 
   const actions = {
     openStation(full) {
@@ -283,6 +304,7 @@ async function boot() {
     if (S.tab === 'around') renderAround()
     if (S.tab === 'trams') renderTrams()
     if (S.tab === 'lines') renderLines()
+    if (S.tab === 'data') renderData()
     if (S.tab === 'info') renderInfo()
   }
 
@@ -313,7 +335,13 @@ async function boot() {
         snapshot ? [config.snapshotEndpoint] : config.rtEndpoints,
         { forceOrigin: snapshot ? 'snapshot' : undefined, cacheBust: !snapshot },
       )
-      set({ live: { ...buildLiveState(net, result), fetchedAt: Date.now() }, liveError: null })
+      const fetchedAt = Date.now()
+      const live = { ...buildLiveState(net, result), fetchedAt }
+      set({ live, liveError: null })
+      const sampleTime = displayMode() === 'snapshot' ? live.timestamp : fetchedAt
+      latestMetrics = computeSnapshotMetrics(net, live, sampleTime)
+      observatoryStore = recordSnapshot(observatoryStore, latestMetrics, live.alerts)
+      saveObservatoryStore(observatoryStore)
     } catch (error) {
       set({ liveError: error.message || 'erreur réseau' })
     } finally {
@@ -393,7 +421,7 @@ async function boot() {
     if (document.hidden) return
     if (displayMode() === 'schedule') applyTrams()
     renderStatus()
-    if (!['info', 'lines', 'journey'].includes(S.tab)) renderAll()
+    if (!['info', 'lines', 'journey', 'data'].includes(S.tab)) renderAll()
   }, 1000)
   setInterval(() => { if (!document.hidden) poll() }, config.pollMs)
 

@@ -77,12 +77,30 @@ export function buildLiveState(net, { origin, vehicleFeed, tripFeed, alertFeed }
     })
   }
 
+  const nowSecs = Math.max(vehicleFeed.timestamp ?? 0, tripFeed.timestamp ?? 0)
+  const routeDelays = new Map()
+  for (const t of tramTrips) {
+    const valid = t.stops.filter((s) => s.relationship !== 1 && s.stopId)
+    const next = valid.find((s) => {
+      const tm = s.departure?.time ?? s.arrival?.time
+      return tm && tm >= nowSecs - 60 && tm <= nowSecs + 2700
+    })
+    if (!next) continue
+    const delay = next.departure?.delay ?? next.arrival?.delay
+    if (typeof delay !== 'number' || Math.abs(delay) > 7200) continue
+    const list = routeDelays.get(t.routeId) ?? []
+    list.push({ tripId: t.tripId, stopId: next.stopId, delay })
+    routeDelays.set(t.routeId, list)
+  }
+
   const vehicles = vehicleFeed.vehicles
     .filter((v) => net.routesById.has(v.routeId) && Number.isFinite(v.lat) && Number.isFinite(v.lon))
     .map((v) => {
       const trip = tripsById.get(v.tripId)
       const stops = trip?.stops.filter((s) => s.relationship !== 1) ?? []
-      const upcoming = stops.find((s) => s.stopId === v.stopId) ?? stops[0]
+      const upcoming = (v.stopId && stops.find((s) => s.stopId === v.stopId))
+        ?? stops.find((s) => ((s.departure?.time ?? s.arrival?.time) ?? 0) >= (v.timestamp ?? nowSecs) - 60)
+        ?? stops.at(-1)
       const event = upcoming?.arrival ?? upcoming?.departure
       const bearing = v.bearing ?? 0
       const guess = stops.length ? null : inferHeadsign(net, v.routeId, v.lat, v.lon, bearing)
@@ -93,7 +111,7 @@ export function buildLiveState(net, { origin, vehicleFeed, tripFeed, alertFeed }
         id: v.vehicleId ?? v.id, label: v.label ?? v.vehicleId ?? v.id, tripId: v.tripId,
         route: v.routeId, dir, lat: v.lat, lon: v.lon,
         bearing, speed: v.speed ?? 0, status: v.status,
-        stopId: v.stopId, headsign: headsign ?? track?.pattern.headsign,
+        stopId: v.stopId ?? upcoming?.stopId, headsign: headsign ?? track?.pattern.headsign,
         patternIdx: track?.pattern.index, patternD: track?.d,
         nextEpochMs: event?.time ? event.time * 1000 : undefined,
         delay: event?.delay ?? null, timestamp: (v.timestamp ?? vehicleFeed.timestamp) * 1000,
@@ -101,9 +119,9 @@ export function buildLiveState(net, { origin, vehicleFeed, tripFeed, alertFeed }
       }
     })
 
-  const timestamp = Math.max(vehicleFeed.timestamp ?? 0, tripFeed.timestamp ?? 0) * 1000
+  const timestamp = nowSecs * 1000
   return {
-    origin, timestamp, vehicles, board,
+    origin, timestamp, vehicles, board, routeDelays,
     alerts: tramAlerts(net, alertFeed, (alertFeed.timestamp ?? Date.now() / 1000)),
   }
 }

@@ -18,10 +18,15 @@
 <body class="datapage">
   <header class="datapage__header">
     <div class="datapage__top">
-      <a class="brand datapage__link" href="/">
-        <img class="brand__mark" src="/icons/logo-mark.png" alt="" width="40" height="28">
-        <h1 class="brand__name">Tram <span>Data</span></h1>
-      </a>
+      <div class="brand">
+        <a class="datapage__link" href="/">
+          <img class="brand__mark" src="/icons/logo-mark.png" alt="Logo Tram Montpellier" width="40" height="30">
+        </a>
+        <div class="brand__text">
+          <a class="datapage__link" href="/"><h1 class="brand__name">Tram <span>Data</span></h1></a>
+          <a class="brand__credit" href="https://lagenceduclapas.fr" target="_blank" rel="noopener">Un site proposé par <strong>L'agence du clapas</strong></a>
+        </div>
+      </div>
       <div class="datapage__nav">
         <p id="status" class="status" role="status" aria-live="polite" data-state="loading">
           <span class="status__dot" aria-hidden="true"></span>
@@ -35,6 +40,11 @@
   <main id="data-root" class="datapage__main panel">
     <p class="notice">Chargement de l'observatoire et des données réseau…</p>
   </main>
+
+  <footer class="agency-footer">
+    <img class="agency-footer__logo" src="/icons/logo-mark.png" alt="" width="28" height="21">
+    <span>Un site proposé par <a href="https://lagenceduclapas.fr" target="_blank" rel="noopener">L'agence du clapas</a></span>
+  </footer>
 
   <noscript><p class="noscript">Cette application nécessite JavaScript.</p></noscript>
   <script type="module" src="/src/data-page.js"></script>

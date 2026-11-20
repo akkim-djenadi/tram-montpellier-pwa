@@ -128,6 +128,20 @@ async function boot() {
   mapCtl.setVisibleRoutes(activeRoutes())
 
   // ── Panneau ──
+  // Si index.html provient d'un ancien cache Service Worker, on injecte l'onglet et le panneau Data à la volée.
+  if (!$('panel-data')) {
+    const link = h('link', { rel: 'stylesheet', href: '/styles/data.css' })
+    document.head.append(link)
+    const tabBtn = h('button', {
+      role: 'tab', id: 'tab-data', class: 'tabs__tab',
+      'aria-selected': 'false', 'aria-controls': 'panel-data', 'data-tab': 'data', tabindex: '-1',
+    }, 'Data')
+    const infoTab = $('tab-info')
+    if (infoTab?.parentElement) infoTab.parentElement.insertBefore(tabBtn, infoTab)
+    const dataPanelEl = h('div', { role: 'tabpanel', id: 'panel-data', class: 'panel', 'aria-labelledby': 'tab-data', hidden: true })
+    $('sheet-body')?.append(dataPanelEl)
+  }
+
   const panels = {
     around: $('panel-around'), trams: $('panel-trams'), lines: $('panel-lines'),
     journey: $('panel-journey'), data: $('panel-data'), info: $('panel-info'),
@@ -141,7 +155,7 @@ async function boot() {
   let observatoryStore = loadObservatoryStore()
   let latestMetrics = computeSnapshotMetrics(net, null, Date.now())
   const dataPanel = createDataPanel({
-    host: panels.data,
+    host: panels.data ?? h('div'),
     net,
     onClearHistory() {
       observatoryStore = createEmptyStore()
@@ -153,7 +167,10 @@ async function boot() {
       renderData()
     },
   })
-  const renderData = () => dataPanel.render({ metrics: latestMetrics, store: observatoryStore, displayMode: displayMode() })
+  const renderData = () => {
+    if (!panels.data) return
+    dataPanel.render({ metrics: latestMetrics, store: observatoryStore, displayMode: displayMode() })
+  }
 
   const actions = {
     openStation(full) {

@@ -19,7 +19,9 @@ export function createSheet({ root, handle, tabs, panels, onTab }) {
       tab.setAttribute('aria-selected', String(selected))
       tab.tabIndex = selected ? 0 : -1
     }
-    for (const [key, panel] of Object.entries(panels)) panel.hidden = key !== name
+    for (const [key, panel] of Object.entries(panels)) {
+      if (panel) panel.hidden = key !== name
+    }
     if (open && snap === 'peek' && !isDesktop()) setSnap('half')
     onTab?.(name)
   }

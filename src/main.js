@@ -311,7 +311,7 @@ async function boot() {
       net.meta.ticketing ? h('a', { class: 'btn btn--ghost', href: net.meta.ticketing, target: '_blank', rel: 'noopener', style: { textAlign: 'center', textDecoration: 'none' } }, 'Acheter sur m-ticket') : null,
       views.installHint(),
       h('a', { class: 'agency-card', href: 'https://lagenceduclapas.fr', target: '_blank', rel: 'noopener' },
-        h('img', { class: 'agency-card__logo', src: '/icons/logo-mark.png', alt: 'Logo Tram Montpellier', width: '44', height: '33' }),
+        h('img', { class: 'agency-card__logo', src: '/icons/logo-tram-clapas.png', alt: 'Logo Tram Montpellier', width: '44', height: '33' }),
         h('div', { class: 'agency-card__body' },
           h('span', { class: 'agency-card__sub' }, 'Un site proposé par'),
           h('strong', { class: 'agency-card__name' }, "L'agence du clapas ↗"))),
@@ -462,5 +462,7 @@ boot().catch((error) => {
 })
 
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch((e) => console.warn('SW', e)))
+  window.addEventListener('load', () =>
+    navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' }).then((r) => r.update()).catch((e) => console.warn('SW', e)),
+  )
 }

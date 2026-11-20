@@ -1,5 +1,5 @@
 // Service worker : application utilisable hors ligne (coque + données + tuiles déjà vues).
-const VERSION = 'v14'
+const VERSION = 'v15'
 const SHELL_CACHE = `tram-shell-${VERSION}`
 const TILE_CACHE = `tram-tiles-${VERSION}`
 const MAX_TILES = 500
@@ -13,6 +13,7 @@ const SHELL = [
   '/src/analytics.js', '/src/data-view.js', '/src/data-page.js',
   '/vendor/leaflet/leaflet.js', '/vendor/leaflet/leaflet.css',
   '/fonts/bricolage-latin.woff2', '/fonts/dmmono-latin.woff2',
+  '/icons/logo-tram-clapas.png', '/icons/icon-tram-192.png', '/icons/icon-tram-512.png', '/icons/favicon-tram-32.png', '/icons/apple-touch-tram.png',
   '/icons/icon-192.png', '/icons/logo-mark.png', '/icons/icon-512.png', '/icons/favicon-32.png', '/icons/apple-touch-icon.png',
   '/data/network.json',
   '/fixtures/VehiclePosition.pb', '/fixtures/TripUpdate.pb', '/fixtures/Alert.pb',
